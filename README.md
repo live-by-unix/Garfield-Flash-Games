@@ -4,6 +4,8 @@ This repository hosts a small web app that lets you play a collection of classic
 
 The project is built as a static HTML app with no backend or package installation required.
 
+Play it here [Click here](https://garfieldflash.pages.dev)  
+
 ## Features
 
 - Run Garfield Flash games directly in the browser
@@ -53,7 +55,7 @@ http://localhost:8000
 
 ## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+This project is licensed under the BSD-3-Clause License. See the `LICENSE` file for details.
 
 ## Credits
 
