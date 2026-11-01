@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#202020">
+  <title>Garfield Flash Games</title>
+
+  <link rel="icon" type="image/svg+xml" href="./garfield.svg">
+  <link rel="apple-touch-icon" href="./garfield.svg">
+
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #111;
+      color: #f5f5f5;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #111;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 18px 22px;
+      background: #202020;
+      border-bottom: 1px solid #383838;
+    }
+
+    .brand-logo {
+      display: block;
+      width: 68px;
+      height: 68px;
+      object-fit: contain;
+      flex: 0 0 auto;
+    }
+
+    .brand-copy { text-align: left; }
+
+    h1 {
+      margin: 0 0 5px;
+      font-size: clamp(1.35rem, 3vw, 1.8rem);
+    }
+
+    header p {
+      margin: 0;
+      color: #bdbdbd;
+    }
+
+    main {
+      width: min(1500px, 100%);
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 245px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    nav,
+    .player-panel {
+      min-width: 0;
+      padding: 14px;
+      background: #202020;
+      border: 1px solid #383838;
+      border-radius: 12px;
+    }
+
+    nav h2,
+    .player-panel h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+
+    #games {
+      display: grid;
+      gap: 8px;
+    }
+
+    button {
+      min-height: 42px;
+      padding: 10px 12px;
+      border: 1px solid #4a4a4a;
+      border-radius: 8px;
+      background: #303030;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    button:hover:not(:disabled) { background: #3b3b3b; }
+
+    button[aria-pressed="true"] {
+      border-color: #f59e0b;
+      background: #49351f;
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    #status {
+      min-height: 1.5em;
+      margin: 0 0 12px;
+      color: #ccc;
+    }
+
+    #stage {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      height: min(78vh, 1000px);
+      min-height: 650px;
+      overflow: auto;
+      background: #080808;
+      border: 1px solid #444;
+      border-radius: 8px;
+    }
+
+    #stage ruffle-player {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 650px;
+    }
+
+    #placeholder {
+      max-width: 520px;
+      padding: 28px;
+      color: #aaa;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .actions button { width: auto; }
+
+    .hint {
+      margin: 12px 0 0;
+      color: #999;
+      font-size: .88rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 760px) {
+      header { padding: 14px; }
+      .brand-logo { width: 54px; height: 54px; }
+      main { padding: 10px; }
+
+      .layout { grid-template-columns: 1fr; }
+
+      #games {
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      }
+
+      #stage {
+        height: 70vh;
+        min-height: 450px;
+      }
+
+      #stage ruffle-player { min-height: 450px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img class="brand-logo" src="./garfield.svg" alt="Garfield logo">
+    <div class="brand-copy">
+      <h1>Garfield Flash Games</h1>
+      <p>Choose a game to play.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="layout">
+      <nav aria-label="Game selection">
+        <h2>Games</h2>
+        <div id="games"></div>
+      </nav>
+
+      <section class="player-panel">
+        <h2 id="game-title">Choose a game</h2>
+        <p id="status" role="status" aria-live="polite">
+          Select a game from the list.
+        </p>
+
+        <div id="stage">
+          <div id="placeholder">Your selected game will appear here.</div>
+        </div>
+
+        <div class="actions">
+          <button id="reload" type="button" disabled>Reload game</button>
+          <button id="fullscreen" type="button" disabled>Fullscreen</button>
+          <button id="stop" type="button" disabled>Stop game</button>
+        </div>
+
+        <p class="hint">
+          Click inside the game after it loads to enable keyboard controls and sound.
+        </p>
+      </section>
+    </div>
+  </main>
+
+  <!-- Use the locally downloaded Ruffle build; no CDN request required. -->
+  <script src="./ruffle-0.7.1-web-selfhosted/ruffle.js"></script>
+
+  <script>
+    const games = [
+      { title: "Escape From Hotel Muncie", file: "Escape From Hotel Muncie/main.swf" },
+      { title: "Garfield's Scary Scavenger Hunt", file: "Garfield's Scary Scavenger Hunt/ssh.swf" },
+      { title: "Garfield's Scary Scavenger Hunt 2", file: "Garfield's Scary Scavenger Hunt 2/ssh2.swf" },
+      { title: "Krazy Kennel Breakout", file: "Krazy Kennel Breakout/main.swf" },
+      { title: "Mystical Forest Adventure", file: "Mystical Forest Adventure/main.swf" },
+      { title: "Punt the Pooch", file: "Punt the Pooch/main.swf" }
+    ];
+
+    const gamesElement = document.getElementById("games");
+    const stage = document.getElementById("stage");
+    const titleElement = document.getElementById("game-title");
+    const statusElement = document.getElementById("status");
+    const reloadButton = document.getElementById("reload");
+    const fullscreenButton = document.getElementById("fullscreen");
+    const stopButton = document.getElementById("stop");
+
+    let selectedGame = null;
+    let player = null;
+    let loadNumber = 0;
+
+    function setStatus(message) {
+      statusElement.textContent = message;
+    }
+
+    function setButtonsEnabled(enabled) {
+      reloadButton.disabled = !enabled;
+      fullscreenButton.disabled = !enabled;
+      stopButton.disabled = !enabled;
+    }
+
+    function showPlaceholder(message) {
+      stage.replaceChildren();
+      const placeholder = document.createElement("div");
+      placeholder.id = "placeholder";
+      placeholder.textContent = message;
+      stage.appendChild(placeholder);
+    }
+
+    function stopGame() {
+      loadNumber++;
+
+      if (player) {
+        try { player.pause(); } catch (_) {}
+        player.remove();
+        player = null;
+      }
+
+      showPlaceholder("Choose a game from the list to load it.");
+      setButtonsEnabled(false);
+    }
+
+    async function loadGame(game) {
+      selectedGame = game;
+      const thisLoad = ++loadNumber;
+
+      titleElement.textContent = game.title;
+      setStatus("Loading " + game.title + "…");
+
+      for (const button of gamesElement.querySelectorAll("button")) {
+        button.setAttribute("aria-pressed", String(button.dataset.file === game.file));
+      }
+
+      if (player) {
+        player.remove();
+        player = null;
+      }
+
+      setButtonsEnabled(false);
+      stage.replaceChildren();
+
+      try {
+        if (!window.RufflePlayer) {
+          throw new Error("Local Ruffle did not load. Check that the ruffle folder is beside index.html.");
+        }
+
+        const ruffle = window.RufflePlayer.newest();
+        const newPlayer = ruffle.createPlayer();
+
+        newPlayer.style.width = "100%";
+        newPlayer.style.height = "100%";
+        newPlayer.style.minHeight = "650px";
+
+        player = newPlayer;
+        stage.appendChild(newPlayer);
+
+        // Resolve each game's relative assets from that game's folder.
+        const folder = game.file.slice(0, game.file.lastIndexOf("/") + 1);
+        const base = new URL(folder, window.location.href).href;
+
+        await newPlayer.load({
+          url: game.file,
+          base,
+          autoplay: "on",
+          unmuteOverlay: "visible"
+        });
+
+        if (thisLoad !== loadNumber || player !== newPlayer) return;
+
+        setStatus("Game loaded. Click inside it to play.");
+        setButtonsEnabled(true);
+      } catch (error) {
+        if (thisLoad !== loadNumber) return;
+
+        player = null;
+        showPlaceholder("This game could not load: " + error.message);
+        setStatus("Game failed to load.");
+        console.error("Failed to load game:", game.title, game.file, error);
+      }
+    }
+
+    for (const game of games) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = game.title;
+      button.dataset.file = game.file;
+      button.setAttribute("aria-pressed", "false");
+      button.addEventListener("click", () => loadGame(game));
+      gamesElement.appendChild(button);
+    }
+
+    reloadButton.addEventListener("click", () => {
+      if (selectedGame) loadGame(selectedGame);
+    });
+
+    stopButton.addEventListener("click", () => {
+      stopGame();
+      selectedGame = null;
+      titleElement.textContent = "Choose a game";
+      setStatus("Game stopped.");
+
+      for (const button of gamesElement.querySelectorAll("button")) {
+        button.setAttribute("aria-pressed", "false");
+      }
+    });
+
+    fullscreenButton.addEventListener("click", async () => {
+      if (!player) return;
+
+      try {
+        if (player.requestFullscreen) {
+          await player.requestFullscreen();
+        } else if (stage.requestFullscreen) {
+          await stage.requestFullscreen();
+        }
+      } catch (error) {
+        setStatus("Could not enter fullscreen: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
