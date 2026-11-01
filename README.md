@@ -4,7 +4,7 @@ This repository hosts a small web app that lets you play a collection of classic
 
 The project is built as a static HTML app with no backend or package installation required.
 
-Play it here [Click here](https://garfieldflash.pages.dev)  
+[Click here](https://garfieldflash.pages.dev) to play!  
 
 ## Features
 
